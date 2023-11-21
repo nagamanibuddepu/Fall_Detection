@@ -26,7 +26,7 @@
 <body>
     <h1><strong>HUMAN FALL DETECTION</strong></h1><br/>
     <p ><strong> click here to send alert</strong> </p>
-    <button style="background:#D80032;padding:10px;border-radius:20px;color:white;"><a href="https://maker.ifttt.com/trigger/fall_detected/with/key/oJgTcPIJo68OKlYVoxrtS-pMRp1KjQEPq1tAqrUzO5x" target="_blank"style="color:white">ALERT</a></button><br/>
+    <button style="background:red;padding:10px;border-radius:20px;color:white;"><a href="https://maker.ifttt.com/trigger/fall_detected/with/key/oJgTcPIJo68OKlYVoxrtS-pMRp1KjQEPq1tAqrUzO5x" target="_blank"style="color:white">ALERT</a></button><br/>
     
    <br/>   <div>
     <br/>
