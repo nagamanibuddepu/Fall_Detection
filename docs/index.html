@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>FallGuard – Emergency Alert System</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&family=Lato:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --red: #D80032;
+    --red-dark: #a8001f;
+    --red-light: #ff4d6d;
+    --bg: #f5f5f0;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --green: #22c55e;
+    --yellow: #f59e0b;
+    --border: #e5e7eb;
+    --shadow: 0 4px 24px rgba(0,0,0,0.08);
+    --radius: 20px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Lato', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* ── TOP BAR ── */
+  header {
+    background: var(--card);
+    border-bottom: 2px solid var(--border);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+  .logo {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 900;
+    font-size: 1.5rem;
+    color: var(--red);
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: var(--text); }
+  .status-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f0fdf4;
+    border: 1.5px solid #bbf7d0;
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #15803d;
+  }
+  .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse-green 2s infinite;
+  }
+  @keyframes pulse-green {
+    0%,100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.5); }
+    50% { box-shadow: 0 0 0 6px rgba(34,197,94,0); }
+  }
+
+  /* ── LAYOUT ── */
+  main {
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 24px 16px 48px;
+  }
+
+  /* ── HERO CARD ── */
+  .hero-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 32px 24px 28px;
+    text-align: center;
+    margin-bottom: 20px;
+    border: 1.5px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, var(--red), var(--red-light));
+  }
+  .person-icon {
+    width: 80px; height: 80px;
+    margin: 0 auto 16px;
+    background: #fff0f3;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    border: 3px solid #fecdd3;
+  }
+  .hero-title {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 900;
+    font-size: 1.6rem;
+    color: var(--text);
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+  .hero-subtitle {
+    color: var(--muted);
+    font-size: 1rem;
+    line-height: 1.5;
+    margin-bottom: 28px;
+  }
+
+  /* ── ALERT BUTTON ── */
+  .btn-alert {
+    display: block;
+    width: 100%;
+    background: var(--red);
+    color: #fff;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 900;
+    font-size: 1.4rem;
+    letter-spacing: 1px;
+    border: none;
+    border-radius: 16px;
+    padding: 22px 16px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+    box-shadow: 0 6px 24px rgba(216,0,50,0.35);
+    position: relative;
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn-alert:active {
+    transform: scale(0.97);
+    box-shadow: 0 2px 10px rgba(216,0,50,0.3);
+  }
+  .btn-alert:hover {
+    background: var(--red-dark);
+    box-shadow: 0 8px 28px rgba(216,0,50,0.45);
+  }
+  .btn-alert .btn-icon { font-size: 1.6rem; display: block; margin-bottom: 4px; }
+  .btn-alert .btn-label { display: block; }
+  .btn-alert .btn-sub {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    opacity: 0.85;
+    margin-top: 4px;
+    letter-spacing: 0;
+  }
+
+  /* ripple */
+  .btn-alert::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(255,255,255,0.25) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .btn-alert:active::after { opacity: 1; }
+
+  /* ── CONFIRM OVERLAY ── */
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    backdrop-filter: blur(4px);
+  }
+  .overlay.show { display: flex; }
+  .overlay-card {
+    background: var(--card);
+    border-radius: 24px;
+    padding: 32px 24px;
+    max-width: 360px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    animation: pop-in 0.25s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes pop-in {
+    from { transform: scale(0.85); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .overlay-icon { font-size: 3rem; margin-bottom: 12px; }
+  .overlay-title {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 900;
+    font-size: 1.4rem;
+    margin-bottom: 8px;
+  }
+  .overlay-text {
+    color: var(--muted);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 24px;
+  }
+  .overlay-btns { display: flex; gap: 12px; }
+  .btn-cancel {
+    flex: 1;
+    background: var(--border);
+    color: var(--text);
+    border: none;
+    border-radius: 12px;
+    padding: 16px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-cancel:hover { background: #d1d5db; }
+  .btn-confirm {
+    flex: 1.5;
+    background: var(--red);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 16px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(216,0,50,0.35);
+    transition: background 0.15s;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .btn-confirm:hover { background: var(--red-dark); }
+
+  /* ── SUCCESS TOAST ── */
+  .toast {
+    display: none;
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #15803d;
+    color: white;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    padding: 14px 28px;
+    border-radius: 999px;
+    z-index: 1100;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    white-space: nowrap;
+    animation: slide-up 0.3s ease;
+  }
+  @keyframes slide-up {
+    from { bottom: 0; opacity: 0; }
+    to { bottom: 28px; opacity: 1; }
+  }
+  .toast.show { display: block; }
+
+  /* ── INFO CARDS ── */
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .info-card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 18px 16px;
+    border: 1.5px solid var(--border);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  .info-card .ic-icon { font-size: 1.6rem; margin-bottom: 8px; }
+  .info-card .ic-label {
+    font-size: 0.78rem;
+    color: var(--muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+  }
+  .info-card .ic-val {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    color: var(--text);
+  }
+
+  /* ── STEPS CARD ── */
+  .steps-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 24px;
+    border: 1.5px solid var(--border);
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+  .steps-title {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 900;
+    font-size: 1.1rem;
+    margin-bottom: 18px;
+    color: var(--text);
+  }
+  .step {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+  .step:last-child { margin-bottom: 0; }
+  .step-num {
+    min-width: 32px; height: 32px;
+    background: var(--red);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 900;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .step-text {
+    font-size: 0.97rem;
+    color: var(--text);
+    line-height: 1.45;
+  }
+  .step-text strong { font-weight: 700; }
+
+  /* ── CAREGIVER CARD ── */
+  .caregiver-card {
+    background: linear-gradient(135deg, #fff0f3, #ffe4e6);
+    border-radius: var(--radius);
+    padding: 22px 20px;
+    border: 1.5px solid #fecdd3;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 14px;
+    align-items: center;
+  }
+  .cg-icon { font-size: 2.2rem; flex-shrink: 0; }
+  .cg-title {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    margin-bottom: 4px;
+  }
+  .cg-text { font-size: 0.88rem; color: #6b2737; line-height: 1.4; }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 0.8rem;
+    color: #9ca3af;
+  }
+
+  /* ── LARGE FONT ACCESSIBILITY TOGGLE ── */
+  .access-bar {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-bottom: 18px;
+  }
+  .access-btn {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    color: var(--text);
+    transition: background 0.15s;
+  }
+  .access-btn:hover { background: var(--border); }
+  .access-btn.active { background: var(--red); color: white; border-color: var(--red); }
+
+  body.large-text {
+    font-size: 1.15rem;
+  }
+  body.large-text .hero-title { font-size: 2rem; }
+  body.large-text .btn-alert { font-size: 1.7rem; padding: 28px 16px; }
+  body.large-text .step-text { font-size: 1.1rem; }
+  body.large-text .info-card .ic-val { font-size: 1.1rem; }
+
+  /* ── HIGH CONTRAST TOGGLE ── */
+  body.high-contrast {
+    background: #000;
+    --card: #111;
+    --text: #fff;
+    --border: #333;
+    --muted: #aaa;
+    --bg: #000;
+  }
+  body.high-contrast header { background: #111; border-color: #333; }
+
+  @media (max-width: 400px) {
+    .hero-title { font-size: 1.35rem; }
+    .btn-alert { font-size: 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">Fall<span>Guard</span></div>
+  <div class="status-pill">
+    <div class="dot"></div>
+    System Active
+  </div>
+</header>
+
+<!-- MAIN -->
+<main>
+
+  <!-- ACCESSIBILITY BAR -->
+  <div class="access-bar">
+    <button class="access-btn" id="btnLarge" onclick="toggleLarge()" title="Large Text">🔤 Large</button>
+    <button class="access-btn" id="btnContrast" onclick="toggleContrast()" title="High Contrast">🌑 Contrast</button>
+  </div>
+
+  <!-- HERO CARD -->
+  <div class="hero-card">
+    <div class="person-icon">🧓</div>
+    <div class="hero-title">Emergency Fall Alert</div>
+    <p class="hero-subtitle">If you have fallen or feel unsafe,<br/>press the button below immediately.</p>
+
+    <button class="btn-alert" onclick="showConfirm()" aria-label="Send Fall Alert Emergency">
+      <span class="btn-icon">🆘</span>
+      <span class="btn-label">SEND ALERT</span>
+      <span class="btn-sub">Notifies your caregiver instantly</span>
+    </button>
+  </div>
+
+  <!-- INFO GRID -->
+  <div class="info-grid">
+    <div class="info-card">
+      <div class="ic-icon">📡</div>
+      <div class="ic-label">Sensor</div>
+      <div class="ic-val">MPU6050</div>
+    </div>
+    <div class="info-card">
+      <div class="ic-icon">🔔</div>
+      <div class="ic-label">Alert Via</div>
+      <div class="ic-val">IFTTT Webhook</div>
+    </div>
+    <div class="info-card">
+      <div class="ic-icon">📶</div>
+      <div class="ic-label">Connectivity</div>
+      <div class="ic-val">Wi-Fi (ESP8266)</div>
+    </div>
+    <div class="info-card">
+      <div class="ic-icon">⚡</div>
+      <div class="ic-label">Detection</div>
+      <div class="ic-val">Real-time</div>
+    </div>
+  </div>
+
+  <!-- CAREGIVER NOTICE -->
+  <div class="caregiver-card">
+    <div class="cg-icon">👨‍⚕️</div>
+    <div>
+      <div class="cg-title">Alert goes directly to your caregiver</div>
+      <div class="cg-text">Your caregiver will be notified via IFTTT within seconds of pressing the alert button.</div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="steps-card">
+    <div class="steps-title">🛡️ How Automatic Detection Works</div>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-text"><strong>Free-fall detected</strong> — sensor registers a sudden drop in acceleration below 0.4g</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text"><strong>Impact detected</strong> — acceleration spikes above 3g (hitting the ground)</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-text"><strong>Orientation change</strong> — body rotation of 80–100° is confirmed</div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-text"><strong>Alert sent</strong> — if no movement follows, an emergency notification is fired automatically</div>
+    </div>
+  </div>
+
+</main>
+
+<!-- CONFIRMATION OVERLAY -->
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="overlayTitle">
+  <div class="overlay-card">
+    <div class="overlay-icon">🚨</div>
+    <div class="overlay-title" id="overlayTitle">Send Emergency Alert?</div>
+    <p class="overlay-text">This will immediately notify your caregiver. Only press <strong>Confirm</strong> if you need help right now.</p>
+    <div class="overlay-btns">
+      <button class="btn-cancel" onclick="hideConfirm()">Cancel</button>
+      <a class="btn-confirm"
+         href="https://maker.ifttt.com/trigger/fall_detected/with/key/oJgTcPIJo68OKlYVoxrtS-pMRp1KjQEPq1tAqrUzO5x"
+         target="_blank"
+         onclick="alertSent()">
+        🆘 Confirm
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- SUCCESS TOAST -->
+<div class="toast" id="toast">✅ Alert sent! Help is on the way.</div>
+
+<footer>FallGuard &copy; 2025 · IoT Fall Detection System</footer>
+
+<script>
+  function showConfirm() {
+    document.getElementById('overlay').classList.add('show');
+  }
+  function hideConfirm() {
+    document.getElementById('overlay').classList.remove('show');
+  }
+  function alertSent() {
+    hideConfirm();
+    const toast = document.getElementById('toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 4000);
+  }
+
+  // Close overlay on backdrop click
+  document.getElementById('overlay').addEventListener('click', function(e) {
+    if (e.target === this) hideConfirm();
+  });
+
+  // Keyboard: ESC closes overlay
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') hideConfirm();
+  });
+
+  function toggleLarge() {
+    document.body.classList.toggle('large-text');
+    document.getElementById('btnLarge').classList.toggle('active');
+  }
+  function toggleContrast() {
+    document.body.classList.toggle('high-contrast');
+    document.getElementById('btnContrast').classList.toggle('active');
+  }
+</script>
+</body>
+</html>
