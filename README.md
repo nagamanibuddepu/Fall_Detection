@@ -4,8 +4,11 @@
 
 ---
 
-## 📸 Live Demo Interface
 
+## 🌐 Live Demo
+👉 [Open FallGuard App](https://nagamanibuddepu.github.io/Fall_Detection/fall_detection.html)
+
+## 📸 Live Demo Interface
 The web interface provides a one-tap emergency button for elderly users, with large text, high contrast mode, and instant caregiver notification.
 
 ---
